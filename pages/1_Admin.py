@@ -35,13 +35,13 @@ if logged_in == "true" and username:
         st.error("Bu sayfaya erişim izniniz yok!")
         if st.button("Çıkış Yap"):
             logout_user()
-            st.experimental_rerun()
+            st.rerun()
         st.stop()
 
     # Logout button for admin
     if st.sidebar.button("Çıkış Yap"):
         logout_user()
-        st.experimental_rerun()
+        st.rerun()
 
     # At this point, user is authenticated as admin
     file_name = "Ürün_Stok.xlsx"
@@ -157,6 +157,6 @@ else:
         if authenticate_user(input_user, input_pass):
             login_user(input_user)
             st.success("Giriş başarılı, sayfa yenileniyor...")
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("Geçersiz kullanıcı adı veya şifre!")
