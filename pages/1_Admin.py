@@ -2,17 +2,10 @@ import streamlit as st
 import pandas as pd
 import os
 import yaml
-import uuid
-import time
 
 # Load user roles from roles.yaml
 with open("roles.yaml", "r") as file:
     roles = yaml.safe_load(file)
-
-TOKEN_EXPIRY = 3600  # seconds (1 hour)
-
-if "token_store" not in st.session_state:
-    st.session_state["token_store"] = {}
 
 def authenticate_user(username, password):
     users = roles["roles"]["users"]
@@ -24,42 +17,19 @@ def get_user_role(username):
     return roles["roles"]["users"][username]["role"]
 
 def login_user(username):
-    token = str(uuid.uuid4())
-    st.session_state["token_store"][token] = {
-        "username": username,
-        "expires": time.time() + TOKEN_EXPIRY
-    }
-    # Set token via st.query_params
-    st.query_params = {"token": token}
-    return token
-
-def validate_token(token):
-    token_info = st.session_state["token_store"].get(token)
-    if token_info and time.time() < token_info["expires"]:
-        return token_info["username"]
-    else:
-        if token in st.session_state["token_store"]:
-            del st.session_state["token_store"][token]
-        return None
+    # Instead of a token, store username and a logged_in flag
+    st.query_params = {"username": username, "logged_in": "true"}
 
 def logout_user():
-    params = st.query_params
-    token = params.get("token")
-    if token and token in st.session_state["token_store"]:
-        del st.session_state["token_store"][token]
-    # Clear query parameters
-    st.query_params = {}
+    st.query_params = {}  # Clears query params, forcing re-login on refresh
 
-# Retrieve current token from query params
+# Check query params
 params = st.query_params
-token = params.get("token")
+logged_in = params.get("logged_in")
+username = params.get("username")
 
-username = None
-if token:
-    username = validate_token(token)
-
-if username:
-    # User is authenticated
+if logged_in == "true" and username:
+    # User is considered authenticated
     user_role = get_user_role(username)
     if user_role != "admin":
         st.error("Bu sayfaya erişim izniniz yok!")
@@ -68,11 +38,12 @@ if username:
             st.experimental_rerun()
         st.stop()
 
-    # Add logout button in sidebar
+    # Logout button for admin
     if st.sidebar.button("Çıkış Yap"):
         logout_user()
         st.experimental_rerun()
 
+    # At this point, user is authenticated as admin
     file_name = "Ürün_Stok.xlsx"
     if os.path.exists(file_name):
         stock_data = pd.read_excel(file_name)
@@ -173,6 +144,7 @@ if username:
                 stock_data["Uyarı"] = edited_data["Uyarı"]
                 stock_data.to_excel(file_name, index=False)
                 st.success("Uyarı değerleri başarıyla güncellendi!")
+
 else:
     # Not authenticated
     st.title("Giriş Yap")
@@ -183,8 +155,8 @@ else:
 
     if submit:
         if authenticate_user(input_user, input_pass):
-            token = login_user(input_user)
+            login_user(input_user)
             st.success("Giriş başarılı, sayfa yenileniyor...")
-            st.rerun()
+            st.experimental_rerun()
         else:
             st.error("Geçersiz kullanıcı adı veya şifre!")
