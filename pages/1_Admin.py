@@ -65,13 +65,13 @@ if username:
         st.error("Bu sayfaya erişim izniniz yok!")
         if st.button("Çıkış Yap"):
             logout_user()
-            st.experimental_rerun()
+            st.rerun()
         st.stop()
 
     # Add logout button in sidebar
     if st.sidebar.button("Çıkış Yap"):
         logout_user()
-        st.experimental_rerun()
+        st.rerun()
 
     file_name = "Ürün_Stok.xlsx"
     if os.path.exists(file_name):
@@ -100,92 +100,9 @@ if username:
     with tab1:
         with st.sidebar:
             st.header("Ürün Girişi")
-            ürün_adi = st.selectbox("Ürün Adı", options=[
-    "50 GR 165 CM ELYAF",
-    "60 GR 65 CM ELYAF",
-    "60 GR 140 CM ELYAF",
-    "60 GR 150 CM ELYAF",
-    "60 GR 160 CM ELYAF",
-    "60 GR 210 CM ELYAF",
-    "60 GR 240 CM ELYAF",
-    "80 GR 70 CM ELYAF",
-    "80 GR 75 CM ELYAF",
-    "80 GR 85 CM ELYAF",
-    "100 GR 75 CM ELYAF",
-    "100 GR 70 CM ELYAF",
-    "100 GR 210 CM ELYAF",
-    "120 GR 85 CM ELYAF",
-    "120 GR 160 CM ELYAF",
-    "210 GÜLLÜ JAGAR",
-    "210 YILANLI JAGAR",
-    "210 DİAGONAL JAGAR",
-    "210 NOKTALI JAGAR",
-    "210 BAKLAVA JAGAR",
-    "210 ÜÇ ÇİZGİLİ JAGAR",
-    "210 EKRU 3 ÇİZGİLİ BEKART",
-    "210 GRİ 3 ÇİZGİLİ BEKART",
-    "210 EKRU DÜZ BEKART",
-    "80 GR 240 CM MİKRO",
-    "80 GR 80 CM MİKRO",
-    "80 GR 90 CM MİKRO",
-    "80 GR 75 CM MİKRO",
-    "100 GR 300 CM MİKRO",
-    "100 GR 90 CM MİKRO",
-    "100 GR 80 CM MİKRO",
-    "100 GR 75 CM MİKRO",
-    "220 CM ASTAR",
-    "46 CM BASKISIZ KOLİ",
-    "30 CM BASKISIZ KOLİ",
-    "35 CM BASKISIZ KOLİ",
-    "42 CM BASKILI KOLİ",
-    "50 CM BASKILI KOLİ",
-    "GÖMLEK KOLİSİ",
-    "ÇARŞAF KOLİSİ",
-    "DANTEL SARIM KOLİSİ",
-    "220 CM ASTAR",
-    "250 CM BEYAZ İP",
-    "160 CM ASTAR",
-    "240 CM BEYAZ İP",
-    "80 CM BEYAZ İP",
-    "160 CM BEYAZ İP",
-    "90 CM BEYAZ İP",
-    "5,5 CM ASTAR",
-    "75 CM ASTAR",
-    "160 CM POLY PUANTİYE",
-    "80 CM POLY PUANTİYE",
-    "160 CM 120 GR BEYAZ İP",
-    "4,5 CM POLY PUANTİYE",
-    "60 GR 70 CM TELA",
-    "60 GR 80 CM TELA",
-    "60 GR 160 CM TELA",
-    "80 GR 160 CM TELA",
-    "80 GR 80 CM TELA",
-    "40 GR 160 CM TELA",
-    "40 GR 120 CM TELA",
-    "40 GR 90 CM TELA",
-    "40 GR 67 CM TELA",
-    "40 GR 80 CM TELA",
-    "60 GR 65 CM TELA",
-    "15 GR 75 CM TELA",
-    "15 GR 80 CM TELA",
-    "15 GR 210 CM TELA",
-    "75 CM ASTAR",
-    "80 CM ASTAR",
-    "90 CM ASTAR",
-    "165 CM ASTAR",
-    "210 CM ASTAR",
-    "60 CM ASTAR",
-    "65 CM ASTAR",
-    "330 CM ASTAR",
-    "280 CM ASTAR",
-    "300 CM ASTAR",
-    "280 CM ŞEKER KASAR",
-    "90 CM ŞEKER KASAR",
-    "80 CM ŞEKER KASAR",
-    "5,5 CM ŞEKER KASAR"
-])
-            gönderen = st.selectbox("Gönderen", options=["Doğa", "Jagar Naim", "Bekart", "Karesi", "Koli Halil", "Lale", "Urba", "Arzu Toprak", "Malzem", "Urba", "Pir Nakış"])
-            alan = st.selectbox("Alan", options=["Depo", "Pir Nakış"])
+            ürün_adi = st.selectbox("Ürün Adı", options=["Ürün A", "Ürün B", "Ürün C"])
+            gönderen = st.selectbox("Gönderen", options=["Gönderen 1", "Gönderen 2", "Gönderen 3"])
+            alan = st.selectbox("Alan", options=["Alan 1", "Alan 2", "Depo"])
             miktar = st.number_input("Miktar", step=0.1, format="%.2f")
             birim = st.radio("Birim", options=["kg", "metre", "adet"])
             # Removed Uyarı Miktarı input
@@ -239,6 +156,21 @@ if username:
         if not filtered_data.empty:
             styled_data = filtered_data.style.apply(highlight_row, axis=1)
             st.dataframe(styled_data, use_container_width=True)
+
+            # Delete feature
+            st.subheader("Silmek İstediğiniz Satırları Seçin")
+            delete_indices = st.multiselect(
+                "Silinecek Satır İndeksleri", options=filtered_data.index, format_func=lambda x: f"Satır {x + 1}"
+            )
+
+            if st.button("Seçili Satırları Sil"):
+                if delete_indices:
+                    stock_data = stock_data.drop(index=delete_indices).reset_index(drop=True)
+                    stock_data.to_excel(file_name, index=False)
+                    st.success("Seçili satırlar başarıyla silindi!")
+                    st.rerun()
+                else:
+                    st.warning("Lütfen silmek istediğiniz satırları seçin.")
         else:
             st.info("Seçilen filtrelere uygun veri bulunmamaktadır.")
 
