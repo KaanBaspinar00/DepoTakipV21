@@ -1,10 +1,10 @@
 roles:
   users:
     canan:
-      password: "$2b$12$BdLGG3UU/FEFgjnbJTgl7uvllQrJRFN7Kv9I09M4NZ0tVbaLdFYbG"
+      password: "0"
       role: "admin"  # Changed from 'users' to 'role'
       name: "Canan"
     Mert:
-      password: "$2b$12$BdLGG3UU/FEFgjnbJTgl7uvllQrJRFN7Kv9I09M4NZ0tVbaLdFYbG"
+      password: "0"
       role: "user"  # Changed from 'users' to 'role'
       name: "Mert"
