@@ -106,7 +106,8 @@ if username:
                 return ["background-color: yellow"] * len(row)
         # If not showing warning or conditions not met, no highlight
         return [""] * len(row)
-
+        
+    tab1, tab2, tab3 = st.tabs(["Stok İşlemleri", "Uyarı Belirle", "Etiketler"])
 
     with tab1:
         with st.sidebar:
@@ -213,6 +214,33 @@ if username:
             # Show highlighted dataframe above the editor
             styled_full = stock_data.style.apply(highlight_row, axis=1)
             st.dataframe(styled_full, use_container_width=True)
+            
+    with tab3:
+        st.header("Etiketler")
+        files = list_etiketler_files()
+
+        if files:
+            for file_path in files:
+                file_name = os.path.basename(file_path)
+                col1, col2, col3 = st.columns([2, 1, 1])
+
+                with col1:
+                    st.write(file_name)
+
+                with col2:
+                    with open(file_path, "rb") as f:
+                        st.download_button(
+                            label="İndir",
+                            data=f.read(),
+                            file_name=file_name,
+                            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        )
+
+                with col3:
+                    if st.button(f"Yazdır", key=file_path):
+                        print_file(file_path)
+        else:
+            st.info("ETİKETLER klasöründe Word dosyası bulunamadı.")
 
 
 else:
