@@ -213,59 +213,59 @@ if username:
             st.dataframe(styled_full, use_container_width=True)
 
     # Add "Etiketler" tab
-with st.tabs(["Stok İşlemleri", "Uyarı Belirle", "Etiketler"])[2]:
-    st.title("Etiketler")
-
-    etikeler_folder = "ETİKETLER"  # Path to the main folder
-
-    if not os.path.exists(etikeler_folder):
-        st.error(f"{etikeler_folder} klasörü mevcut değil. Lütfen doğru yolu kontrol edin.")
-    else:
-        subfolders = [f for f in os.listdir(etikeler_folder) if os.path.isdir(os.path.join(etikeler_folder, f))]
-
-        selected_subfolder = st.selectbox("Alt Klasör Seçiniz", options=subfolders, format_func=lambda x: x.capitalize())
-
-        if selected_subfolder:
-            subfolder_path = os.path.join(etikeler_folder, selected_subfolder)
-            doc_files = [f for f in os.listdir(subfolder_path) if f.endswith(".doc") or f.endswith(".docx")]
-
-            selected_doc = st.selectbox("Doküman Seçiniz", options=doc_files, format_func=lambda x: x.capitalize())
-
-            if selected_doc:
-                doc_path = os.path.join(subfolder_path, selected_doc)
-
-                try:
-                    doc = docx.Document(doc_path)
-                    st.subheader(f"Seçilen Doküman: {selected_doc}")
-
-                    # Display document content
-                    for paragraph in doc.paragraphs:
-                        st.write(paragraph.text)
-
-                    # Print option - Create PDF
-                    if st.button("Yazdır"):
-                        pdf = FPDF()
-                        pdf.add_page()
-                        pdf.set_font("Arial", size=12)
-
-                        # Add content to the PDF
+    with st.tabs(["Stok İşlemleri", "Uyarı Belirle", "Etiketler"])[2]:
+        st.title("Etiketler")
+    
+        etikeler_folder = "ETİKETLER"  # Path to the main folder
+    
+        if not os.path.exists(etikeler_folder):
+            st.error(f"{etikeler_folder} klasörü mevcut değil. Lütfen doğru yolu kontrol edin.")
+        else:
+            subfolders = [f for f in os.listdir(etikeler_folder) if os.path.isdir(os.path.join(etikeler_folder, f))]
+    
+            selected_subfolder = st.selectbox("Alt Klasör Seçiniz", options=subfolders, format_func=lambda x: x.capitalize())
+    
+            if selected_subfolder:
+                subfolder_path = os.path.join(etikeler_folder, selected_subfolder)
+                doc_files = [f for f in os.listdir(subfolder_path) if f.endswith(".doc") or f.endswith(".docx")]
+    
+                selected_doc = st.selectbox("Doküman Seçiniz", options=doc_files, format_func=lambda x: x.capitalize())
+    
+                if selected_doc:
+                    doc_path = os.path.join(subfolder_path, selected_doc)
+    
+                    try:
+                        doc = docx.Document(doc_path)
+                        st.subheader(f"Seçilen Doküman: {selected_doc}")
+    
+                        # Display document content
                         for paragraph in doc.paragraphs:
-                            pdf.multi_cell(0, 10, paragraph.text)
-
-                        # Create a downloadable PDF file
-                        pdf_buffer = io.BytesIO()
-                        pdf.output(pdf_buffer)
-                        pdf_buffer.seek(0)
-
-                        st.download_button(
-                            label="PDF Olarak İndir",
-                            data=pdf_buffer,
-                            file_name=f"{selected_doc}.pdf",
-                            mime="application/pdf"
-                        )
-
-                except Exception as e:
-                    st.error(f"Doküman okunurken bir hata oluştu: {e}")
+                            st.write(paragraph.text)
+    
+                        # Print option - Create PDF
+                        if st.button("Yazdır"):
+                            pdf = FPDF()
+                            pdf.add_page()
+                            pdf.set_font("Arial", size=12)
+    
+                            # Add content to the PDF
+                            for paragraph in doc.paragraphs:
+                                pdf.multi_cell(0, 10, paragraph.text)
+    
+                            # Create a downloadable PDF file
+                            pdf_buffer = io.BytesIO()
+                            pdf.output(pdf_buffer)
+                            pdf_buffer.seek(0)
+    
+                            st.download_button(
+                                label="PDF Olarak İndir",
+                                data=pdf_buffer,
+                                file_name=f"{selected_doc}.pdf",
+                                mime="application/pdf"
+                            )
+    
+                    except Exception as e:
+                        st.error(f"Doküman okunurken bir hata oluştu: {e}")
 
 
 
