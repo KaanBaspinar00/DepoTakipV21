@@ -118,7 +118,7 @@ if username:
         # If not showing warning or conditions not met, no highlight
         return [""] * len(row)
         
-    tab1, tab2, tab3 = st.tabs(["Stok İşlemleri", "Uyarı Belirle"])
+    tab1, tab2 = st.tabs(["Stok İşlemleri", "Uyarı Belirle"])
     show_warning = st.button("Uyarı Göster")
 
     with tab1:
