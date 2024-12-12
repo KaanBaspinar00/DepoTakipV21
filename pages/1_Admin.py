@@ -5,7 +5,6 @@ import yaml
 import uuid
 import time
 import docx
-from fpdf import FPDF
 import io
 
 # Load user roles from roles.yaml
@@ -107,11 +106,7 @@ if username:
         stock_data = pd.DataFrame(columns=["Ürün Adı", "Gönderen", "Alan", "Miktar", "Birim", "Uyarı"])
         stock_data["Uyarı"] = 0
 
-    st.title("Stok Takip Programı - Admin Paneli")
-    tab1, tab2 = st.tabs(["Stok İşlemleri", "Uyarı Belirle"])
-
     # Add "Uyarı Göster" button at the top
-    show_warning = st.button("Uyarı Göster")
 
 
     def highlight_row(row):
@@ -124,6 +119,7 @@ if username:
         return [""] * len(row)
         
     tab1, tab2, tab3 = st.tabs(["Stok İşlemleri", "Uyarı Belirle", "Etiketler"])
+    show_warning = st.button("Uyarı Göster")
 
     with tab1:
         with st.sidebar:
