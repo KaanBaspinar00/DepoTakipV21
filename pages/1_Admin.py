@@ -175,16 +175,12 @@ if username:
             st.info("Seçilen filtrelere uygun veri bulunmamaktadır.")
 
     with tab2:
-        st.header("Uyarı Değerlerini Düzenle")
 
         if stock_data.empty:
             st.info("Stok verisi bulunmamaktadır.")
         else:
+            st.write("## Uyarı Değiştirme")
             st.write("Aşağıdaki tabloda 'Uyarı' sütununu istediğiniz gibi güncelleyebilirsiniz. Değişiklikleri yaptıktan sonra 'Güncelle' butonuna tıklayın.")
-
-            # Show highlighted dataframe above the editor
-            styled_full = stock_data.style.apply(highlight_row, axis=1)
-            st.dataframe(styled_full, use_container_width=True)
 
             edited_data = st.data_editor(
                 stock_data,
@@ -194,11 +190,20 @@ if username:
                 disabled=["Ürün Adı", "Gönderen", "Alan", "Miktar", "Birim"],
                 use_container_width=True
             )
-
+            
             if st.button("Güncelle"):
                 stock_data["Uyarı"] = edited_data["Uyarı"]
                 stock_data.to_excel(file_name, index=False)
                 st.success("Uyarı değerleri başarıyla güncellendi!")
+
+            st.divider()
+            st.write("Stok Tablosu")
+            # Show highlighted dataframe above the editor
+            styled_full = stock_data.style.apply(highlight_row, axis=1)
+            st.dataframe(styled_full, use_container_width=True)
+            
+
+            
 else:
     # Not authenticated
     st.title("Giriş Yap")
