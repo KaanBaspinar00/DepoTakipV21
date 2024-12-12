@@ -2,10 +2,17 @@ import streamlit as st
 import pandas as pd
 import os
 import yaml
+import uuid
+import time
 
 # Load user roles from roles.yaml
 with open("roles.yaml", "r") as file:
     roles = yaml.safe_load(file)
+
+TOKEN_EXPIRY = 3600  # seconds (1 hour)
+
+if "token_store" not in st.session_state:
+    st.session_state["token_store"] = {}
 
 def authenticate_user(username, password):
     users = roles["roles"]["users"]
@@ -17,33 +24,55 @@ def get_user_role(username):
     return roles["roles"]["users"][username]["role"]
 
 def login_user(username):
-    # Instead of a token, store username and a logged_in flag
-    st.query_params = {"username": username, "logged_in": "true"}
+    token = str(uuid.uuid4())
+    st.session_state["token_store"][token] = {
+        "username": username,
+        "expires": time.time() + TOKEN_EXPIRY
+    }
+    # Set token via st.query_params
+    st.query_params = {"token": token}
+    return token
+
+def validate_token(token):
+    token_info = st.session_state["token_store"].get(token)
+    if token_info and time.time() < token_info["expires"]:
+        return token_info["username"]
+    else:
+        if token in st.session_state["token_store"]:
+            del st.session_state["token_store"][token]
+        return None
 
 def logout_user():
-    st.query_params = {}  # Clears query params, forcing re-login on refresh
+    params = st.query_params
+    token = params.get("token")
+    if token and token in st.session_state["token_store"]:
+        del st.session_state["token_store"][token]
+    # Clear query parameters
+    st.query_params = {}
 
-# Check query params
+# Retrieve current token from query params
 params = st.query_params
-logged_in = params.get("logged_in")
-username = params.get("username")
+token = params.get("token")
 
-if logged_in == "true" and username:
-    # User is considered authenticated
+username = None
+if token:
+    username = validate_token(token)
+
+if username:
+    # User is authenticated
     user_role = get_user_role(username)
     if user_role != "admin":
         st.error("Bu sayfaya erişim izniniz yok!")
         if st.button("Çıkış Yap"):
             logout_user()
-            st.rerun()
+            st.experimental_rerun()
         st.stop()
 
-    # Logout button for admin
+    # Add logout button in sidebar
     if st.sidebar.button("Çıkış Yap"):
         logout_user()
-        st.rerun()
+        st.experimental_rerun()
 
-    # At this point, user is authenticated as admin
     file_name = "Ürün_Stok.xlsx"
     if os.path.exists(file_name):
         stock_data = pd.read_excel(file_name)
@@ -56,6 +85,18 @@ if logged_in == "true" and username:
     st.title("Stok Takip Programı - Admin Paneli")
     tab1, tab2 = st.tabs(["Stok İşlemleri", "Uyarı Belirle"])
 
+    # Add "Uyarı Göster" button at the top
+    show_warning = st.button("Uyarı Göster")
+
+    def highlight_row(row):
+        if show_warning:
+            if row["Miktar"] == 0:
+                return ["background-color: red"] * len(row)
+            elif row["Miktar"] < row["Uyarı"]:
+                return ["background-color: yellow"] * len(row)
+        # If not showing warning or conditions not met, no highlight
+        return [""] * len(row)
+
     with tab1:
         with st.sidebar:
             st.header("Ürün Girişi")
@@ -64,7 +105,7 @@ if logged_in == "true" and username:
             alan = st.selectbox("Alan", options=["Alan 1", "Alan 2", "Depo"])
             miktar = st.number_input("Miktar", step=0.1, format="%.2f")
             birim = st.radio("Birim", options=["kg", "metre", "adet"])
-            uyari_miktari = st.number_input("Uyarı Miktarı", step=0.1, format="%.2f")
+            # Removed Uyarı Miktarı input
 
             if st.button("Kaydet"):
                 existing_row = stock_data[
@@ -76,7 +117,6 @@ if logged_in == "true" and username:
 
                 if not existing_row.empty:
                     stock_data.loc[existing_row.index, "Miktar"] += miktar
-                    stock_data.loc[existing_row.index, "Uyarı"] = uyari_miktari
                 else:
                     new_data = {
                         "Ürün Adı": ürün_adi,
@@ -84,7 +124,7 @@ if logged_in == "true" and username:
                         "Alan": alan,
                         "Miktar": miktar,
                         "Birim": birim,
-                        "Uyarı": uyari_miktari
+                        "Uyarı": 0
                     }
                     stock_data = pd.concat([stock_data, pd.DataFrame([new_data])], ignore_index=True)
 
@@ -114,11 +154,6 @@ if logged_in == "true" and username:
         st.header("Mevcut Stok Verileri")
 
         if not filtered_data.empty:
-            def highlight_row(row):
-                if row["Miktar"] < row["Uyarı"]:
-                    return ["background-color: yellow"] * len(row)
-                return [""] * len(row)
-
             styled_data = filtered_data.style.apply(highlight_row, axis=1)
             st.dataframe(styled_data, use_container_width=True)
         else:
@@ -131,6 +166,11 @@ if logged_in == "true" and username:
             st.info("Stok verisi bulunmamaktadır.")
         else:
             st.write("Aşağıdaki tabloda 'Uyarı' sütununu istediğiniz gibi güncelleyebilirsiniz. Değişiklikleri yaptıktan sonra 'Güncelle' butonuna tıklayın.")
+
+            # Show highlighted dataframe above the editor
+            styled_full = stock_data.style.apply(highlight_row, axis=1)
+            st.dataframe(styled_full, use_container_width=True)
+
             edited_data = st.data_editor(
                 stock_data,
                 column_config={
@@ -144,7 +184,6 @@ if logged_in == "true" and username:
                 stock_data["Uyarı"] = edited_data["Uyarı"]
                 stock_data.to_excel(file_name, index=False)
                 st.success("Uyarı değerleri başarıyla güncellendi!")
-
 else:
     # Not authenticated
     st.title("Giriş Yap")
@@ -155,7 +194,7 @@ else:
 
     if submit:
         if authenticate_user(input_user, input_pass):
-            login_user(input_user)
+            token = login_user(input_user)
             st.success("Giriş başarılı, sayfa yenileniyor...")
             st.rerun()
         else:
