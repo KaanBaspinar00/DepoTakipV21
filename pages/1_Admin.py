@@ -4,6 +4,7 @@ import os
 import yaml
 import uuid
 import time
+import docx
 
 # Load user roles from roles.yaml
 with open("roles.yaml", "r") as file:
@@ -14,14 +15,17 @@ TOKEN_EXPIRY = 3600  # seconds (1 hour)
 if "token_store" not in st.session_state:
     st.session_state["token_store"] = {}
 
+
 def authenticate_user(username, password):
     users = roles["roles"]["users"]
     if username in users and users[username]["password"] == password:
         return True
     return False
 
+
 def get_user_role(username):
     return roles["roles"]["users"][username]["role"]
+
 
 def login_user(username):
     token = str(uuid.uuid4())
@@ -33,6 +37,7 @@ def login_user(username):
     st.query_params = {"token": token}
     return token
 
+
 def validate_token(token):
     token_info = st.session_state["token_store"].get(token)
     if token_info and time.time() < token_info["expires"]:
@@ -42,6 +47,7 @@ def validate_token(token):
             del st.session_state["token_store"][token]
         return None
 
+
 def logout_user():
     params = st.query_params
     token = params.get("token")
@@ -49,6 +55,7 @@ def logout_user():
         del st.session_state["token_store"][token]
     # Clear query parameters
     st.query_params = {}
+
 
 # Retrieve current token from query params
 params = st.query_params
@@ -88,6 +95,7 @@ if username:
     # Add "Uyarı Göster" button at the top
     show_warning = st.button("Uyarı Göster")
 
+
     def highlight_row(row):
         if show_warning:
             if row["Miktar"] == 0:
@@ -96,6 +104,7 @@ if username:
                 return ["background-color: yellow"] * len(row)
         # If not showing warning or conditions not met, no highlight
         return [""] * len(row)
+
 
     with tab1:
         with st.sidebar:
@@ -113,7 +122,7 @@ if username:
                     (stock_data["Gönderen"] == gönderen) &
                     (stock_data["Alan"] == alan) &
                     (stock_data["Birim"] == birim)
-                ]
+                    ]
 
                 if not existing_row.empty:
                     stock_data.loc[existing_row.index, "Miktar"] += miktar
@@ -180,7 +189,8 @@ if username:
             st.info("Stok verisi bulunmamaktadır.")
         else:
             st.write("## Uyarı Değiştirme")
-            st.write("Aşağıdaki tabloda 'Uyarı' sütununu istediğiniz gibi güncelleyebilirsiniz. Değişiklikleri yaptıktan sonra 'Güncelle' butonuna tıklayın.")
+            st.write(
+                "Aşağıdaki tabloda 'Uyarı' sütununu istediğiniz gibi güncelleyebilirsiniz. Değişiklikleri yaptıktan sonra 'Güncelle' butonuna tıklayın.")
 
             edited_data = st.data_editor(
                 stock_data,
@@ -190,7 +200,7 @@ if username:
                 disabled=["Ürün Adı", "Gönderen", "Alan", "Miktar", "Birim"],
                 use_container_width=True
             )
-            
+
             if st.button("Güncelle"):
                 stock_data["Uyarı"] = edited_data["Uyarı"]
                 stock_data.to_excel(file_name, index=False)
@@ -201,9 +211,48 @@ if username:
             # Show highlighted dataframe above the editor
             styled_full = stock_data.style.apply(highlight_row, axis=1)
             st.dataframe(styled_full, use_container_width=True)
-            
 
-            
+    # Add "Etiketler" tab
+    with st.tabs(["Stok İşlemleri", "Uyarı Belirle", "Etiketler"])[2]:
+        st.title("Etiketler")
+
+        etikeler_folder = "ETİKETLER"  # Path to the main folder
+
+        if not os.path.exists(etikeler_folder):
+            st.error(f"{etikeler_folder} klasörü mevcut değil. Lütfen doğru yolu kontrol edin.")
+        else:
+            subfolders = [f for f in os.listdir(etikeler_folder) if os.path.isdir(os.path.join(etikeler_folder, f))]
+
+            selected_subfolder = st.selectbox("Alt Klasör Seçiniz", options=subfolders,
+                                              format_func=lambda x: x.capitalize())
+
+            if selected_subfolder:
+                subfolder_path = os.path.join(etikeler_folder, selected_subfolder)
+                doc_files = [f for f in os.listdir(subfolder_path) if f.endswith(".doc") or f.endswith(".docx")]
+
+                selected_doc = st.selectbox("Doküman Seçiniz", options=doc_files, format_func=lambda x: x.capitalize())
+
+                if selected_doc:
+                    doc_path = os.path.join(subfolder_path, selected_doc)
+
+                    try:
+                        doc = docx.Document(doc_path)
+                        st.subheader(f"Seçilen Doküman: {selected_doc}")
+
+                        # Display document content
+                        for paragraph in doc.paragraphs:
+                            st.write(paragraph.text)
+
+                        # Print option
+                        if st.button("Yazdır"):
+                            st.write(f"Doküman {selected_doc} yazdırılıyor...")
+                            # Integration with print logic can go here
+
+                    except Exception as e:
+                        st.error(f"Doküman okunurken bir hata oluştu: {e}")
+
+
+
 else:
     # Not authenticated
     st.title("Giriş Yap")
