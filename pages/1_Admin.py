@@ -57,6 +57,22 @@ def logout_user():
         del st.session_state["token_store"][token]
     # Clear query parameters
     st.query_params = {}
+def list_etiketler_files():
+    etiketler_folder = "ETİKETLER"
+    file_paths = []
+    for root, _, files in os.walk(etiketler_folder):
+        for file in files:
+            if file.endswith(".docx"):
+                file_paths.append(os.path.join(root, file))
+    return file_paths
+
+def download_file(file_path):
+    with open(file_path, "rb") as f:
+        return f.read()
+
+def print_file(file_path):
+    # Placeholder for actual print logic
+    st.success(f"{file_path} gönderildi.")
 
 
 # Retrieve current token from query params
