@@ -6,6 +6,7 @@ import uuid
 import time
 import docx
 from fpdf import FPDF
+import io
 
 # Load user roles from roles.yaml
 with open("roles.yaml", "r") as file:
