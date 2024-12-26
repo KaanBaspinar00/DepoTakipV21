@@ -117,8 +117,8 @@ if username:
                 return ["background-color: yellow"] * len(row)
         # If not showing warning or conditions not met, no highlight
         return [""] * len(row)
-        
-    tab1, tab2 = st.tabs(["Stok İşlemleri", "Uyarı Belirle"])
+
+    tab1, tab2, tab3 = st.tabs(["Stok İşlemleri", "Uyarı Belirle", "Etiketler"])
     show_warning = st.button("Uyarı Göster")
 
     with tab1:
@@ -226,6 +226,40 @@ if username:
             # Show highlighted dataframe above the editor
             styled_full = stock_data.style.apply(highlight_row, axis=1)
             st.dataframe(styled_full, use_container_width=True)
+    with tab3:
+        st.header("Etiketler")
+
+        # List Word documents in the "ETİKETLER" folder
+        etiketler_folder = "ETİKETLER"
+        if not os.path.exists(etiketler_folder):
+            st.warning("ETİKETLER klasörü bulunamadı!")
+        else:
+            files = list_etiketler_files()  # Use the function defined earlier
+            if not files:
+                st.info("Klasörde herhangi bir Word dosyası bulunamadı.")
+            else:
+                # Display files in a selectbox
+                selected_file = st.selectbox("Görüntülemek istediğiniz dosyayı seçin:", files)
+
+                if selected_file:
+                    # Add an option to view the selected document
+                    st.subheader("Seçilen Belge")
+                    with open(selected_file, "rb") as f:
+                        doc = docx.Document(io.BytesIO(f.read()))
+                        for para in doc.paragraphs:
+                            st.write(para.text)
+
+                    # Add a download button for the selected file
+                    st.download_button(
+                        label="Dosyayı İndir",
+                        data=download_file(selected_file),
+                        file_name=os.path.basename(selected_file),
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    )
+
+                    # Add a button to simulate printing the document
+                    if st.button("Yazdır"):
+                        print_file(selected_file)
             
 
 
