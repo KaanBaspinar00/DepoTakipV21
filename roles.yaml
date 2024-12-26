@@ -6,7 +6,7 @@ roles:
       name: "canan"
 
     kaan:
-      password: "258831"
+      password: "2588"
       role: "admin"  # Changed from 'users' to 'role'
       name: "kaan"
 
