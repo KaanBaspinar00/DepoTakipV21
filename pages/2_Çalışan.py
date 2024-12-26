@@ -4,6 +4,31 @@ import os
 from pyzbar.pyzbar import decode
 from PIL import Image
 import yaml
+import time
+
+def log_activity(action, username, details):
+    """Log an activity into the activity log file."""
+    log_file = "activity_log.csv"
+    timestamp = time.strftime("%d/%m/%Y - %H:%M")
+    new_entry = pd.DataFrame([{ "Action": action, "User": username, "Details": details, "Timestamp": timestamp }])
+
+    if os.path.exists(log_file):
+        existing_logs = pd.read_csv(log_file)
+        updated_logs = pd.concat([existing_logs, new_entry], ignore_index=True)
+    else:
+        updated_logs = new_entry
+
+    updated_logs.to_csv(log_file, index=False)
+
+def show_activity_log():
+    """Display the activity log in the admin panel."""
+    log_file = "activity_log.csv"
+    if os.path.exists(log_file):
+        log_data = pd.read_csv(log_file)
+        st.dataframe(log_data, use_container_width=True)
+    else:
+        st.info("Aktivite Bulunamadı !")
+
 
 # Load user roles from roles.yaml
 with open("roles.yaml", "r") as file:
@@ -114,6 +139,9 @@ if logged_in == "true" and current_username:
                         stock_data.to_excel(file_name, index=False)
 
                         st.success("İşlem başarıyla kaydedildi ve stok güncellendi!")
+                        log_activity("Ürün Ekleme", current_username,
+                                     f"Ürün: {matching_asset} ; Miktar: {kullanilacak_miktar}")
+
         else:
             st.error("QR kod tespit edilemedi. Lütfen doğru bir QR kod gösterdiğinizden emin olun.")
 
