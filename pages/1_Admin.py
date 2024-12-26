@@ -73,6 +73,32 @@ def print_file(file_path):
     # Placeholder for actual print logic
     st.success(f"{file_path} gönderildi.")
 
+def log_activity(action, username, details):
+    """Log an activity into the activity log file."""
+    log_file = "activity_log.csv"
+    timestamp = time.strftime("%d/%m/%Y - %H:%M")
+    new_entry = pd.DataFrame([{ "Action": action, "User": username, "Details": details, "Timestamp": timestamp }])
+
+    if os.path.exists(log_file):
+        existing_logs = pd.read_csv(log_file)
+        updated_logs = pd.concat([existing_logs, new_entry], ignore_index=True)
+    else:
+        updated_logs = new_entry
+
+    updated_logs.to_csv(log_file, index=False)
+
+def show_activity_log():
+    """Display the activity log in the admin panel."""
+    log_file = "activity_log.csv"
+    if os.path.exists(log_file):
+        log_data = pd.read_csv(log_file)
+        st.dataframe(log_data, use_container_width=True)
+    else:
+        st.info("Aktivite Bulunamadı !")
+
+        #log_activity("Ürün Ekleme", username,
+                     #f"Ürün: {ürün_adi} ; Miktar: {miktar} {birim} ; Alan: {alan} ; Kimden: {gönderen}")
+
 
 # Retrieve current token from query params
 params = st.query_params
@@ -118,7 +144,7 @@ if username:
         # If not showing warning or conditions not met, no highlight
         return [""] * len(row)
 
-    tab1, tab2, tab3 = st.tabs(["Stok İşlemleri", "Uyarı Belirle", "Etiketler"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Stok İşlemleri", "Uyarı Belirle", "Etiketler", "Aktiviteler"])
     show_warning = st.button("Uyarı Göster")
 
     with tab1:
@@ -154,6 +180,8 @@ if username:
 
                 stock_data.to_excel(file_name, index=False)
                 st.success("Veri başarıyla kaydedildi!")
+                log_activity("Ürün Ekleme", username, f"Ürün: {ürün_adi} ; Miktar: {miktar} {birim} ; Alan: {alan} ; Kimden: {gönderen}")
+
 
         st.sidebar.header("Filtreleme")
         filtered_data = stock_data.copy()
@@ -189,9 +217,11 @@ if username:
 
             if st.button("Seçili Satırları Sil"):
                 if delete_indices:
+                    deleted_rows = stock_data.iloc[delete_indices]
                     stock_data = stock_data.drop(index=delete_indices).reset_index(drop=True)
                     stock_data.to_excel(file_name, index=False)
                     st.success("Seçili satırlar başarıyla silindi!")
+                    log_activity("Satır Sil", username, f"Silinen Satırlar: {deleted_rows.to_dict(orient='records')}")
                     st.rerun()
                 else:
                     st.warning("Lütfen silmek istediğiniz satırları seçin.")
@@ -220,6 +250,8 @@ if username:
                 stock_data["Uyarı"] = edited_data["Uyarı"]
                 stock_data.to_excel(file_name, index=False)
                 st.success("Uyarı değerleri başarıyla güncellendi!")
+                log_activity("Uyarı Güncellemesi", username, "Depo verisi için uyarıları güncelledi")
+
 
             st.divider()
             st.write("Stok Tablosu")
@@ -260,6 +292,12 @@ if username:
                     # Add a button to simulate printing the document
                     if st.button("Yazdır"):
                         print_file(selected_file)
+
+
+    with tab4:
+        st.header("Aktiviteler")
+        st.write("All actions performed on the platform are logged here.")
+        show_activity_log()
             
 
 
@@ -278,3 +316,6 @@ else:
             st.rerun()
         else:
             st.error("Geçersiz kullanıcı adı veya şifre!")
+
+
+
