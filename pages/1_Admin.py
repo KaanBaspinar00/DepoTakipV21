@@ -99,7 +99,16 @@ def show_activity_log():
         #log_activity("Ürün Ekleme", username,
                      #f"Ürün: {ürün_adi} ; Miktar: {miktar} {birim} ; Alan: {alan} ; Kimden: {gönderen}")
 
-
+file_name = "Ürün_Stok.xlsx"
+if not os.path.exists(file_name):
+    # Create an empty DataFrame and save it
+    stock_data = pd.DataFrame(columns=["Ürün Adı", "Gönderen", "Alan", "Miktar", "Birim", "Uyarı"])
+    stock_data.to_excel(file_name, index=False, engine='openpyxl')
+else:
+    stock_data = pd.read_excel(file_name, engine='openpyxl')
+    if "Uyarı" not in stock_data.columns:
+        stock_data["Uyarı"] = 0
+        
 # Retrieve current token from query params
 params = st.query_params
 token = params.get("token")
@@ -123,7 +132,7 @@ if username:
         logout_user()
         st.rerun()
 
-    file_name = "Ürün_Stok.xlsx"
+    file_name = os.path.join(os.getcwd(), "Ürün_Stok.xlsx")
     if os.path.exists(file_name):
         stock_data = pd.read_excel(file_name)
         if "Uyarı" not in stock_data.columns:
@@ -178,7 +187,8 @@ if username:
                     }
                     stock_data = pd.concat([stock_data, pd.DataFrame([new_data])], ignore_index=True)
 
-                stock_data.to_excel(file_name, index=False)
+                stock_data.to_excel(file_name, index=False, engine='openpyxl')
+
                 st.success("Veri başarıyla kaydedildi!")
                 log_activity("Ürün Ekleme", username, f"Ürün: {ürün_adi} ; Miktar: {miktar} {birim} ; Alan: {alan} ; Kimden: {gönderen}")
 
