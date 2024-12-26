@@ -1,0 +1,4 @@
+Action,User,Details,Timestamp
+Ürün Ekleme,canan,Ürün: 50 GR 165 CM ELYAF - DOGA ; Miktar: 0.0 kg ; Alan: DEPO ; Kimden: DOGA,26/12/2024 - 10:23
+Ürün Ekleme,canan,Ürün: 60 GR 140 CM ELYAF  - DOGA ; Miktar: 0.0 kg ; Alan: DEPO ; Kimden: DOGA,26/12/2024 - 10:31
+Satır Sil,canan,"Silinen Satırlar: [{'Ürün Adı': '50 GR 165 CM ELYAF - DOGA', 'Gönderen': 'DOGA', 'Alan': 'DEPO', 'Miktar': 70.0, 'Birim': 'kg', 'Uyarı': 10}, {'Ürün Adı': '50 GR 165 CM ELYAF - DOGA', 'Gönderen': 'DOGA', 'Alan': 'PIR NAKIS', 'Miktar': 69.8, 'Birim': 'kg', 'Uyarı': 0}, {'Ürün Adı': '60 GR 140 CM ELYAF  - DOGA', 'Gönderen': 'DOGA', 'Alan': 'DEPO', 'Miktar': 0.0, 'Birim': 'kg', 'Uyarı': 0}]",26/12/2024 - 10:32
