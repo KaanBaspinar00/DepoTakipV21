@@ -139,8 +139,8 @@ if logged_in == "true" and current_username:
                         stock_data.to_excel(file_name, index=False)
 
                         st.success("İşlem başarıyla kaydedildi ve stok güncellendi!")
-                        log_activity("Ürün Ekleme", current_username,
-                                     f"Ürün: {matching_asset} ; Miktar: {kullanilacak_miktar}")
+                        log_activity("Ürün Kullanma", current_username,
+                                     f"Ürün: {stock_data['Ürün Adı']} ; Miktar: {kullanilacak_miktar}")
 
         else:
             st.error("QR kod tespit edilemedi. Lütfen doğru bir QR kod gösterdiğinizden emin olun.")
