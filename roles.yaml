@@ -1,10 +1,48 @@
 roles:
   users:
     canan:
-      password: "0"
+      password: "258831"
       role: "admin"  # Changed from 'users' to 'role'
-      name: "Canan"
+      name: "canan"
+
+    kaan:
+      password: "258831"
+      role: "admin"  # Changed from 'users' to 'role'
+      name: "kaan"
+
+    yilmaz:
+      password: "258831"
+      role: "admin"  # Changed from 'users' to 'role'
+      name: "yilmaz"
+
+    sinan:
+      password: "sinan-2025"
+      role: "admin"  # Changed from 'users' to 'role'
+      name: "sinan"
+
+    elif:
+      password: "258831"
+      role: "admin"  # Changed from 'users' to 'role'
+      name: "elif"
+      
     mert:
-      password: "0"
+      password: "ybsmert"
       role: "worker"  # Changed from 'users' to 'role'
       name: "mert"
+
+    umut:
+      password: "ybsumut"
+      role: "worker"  # Changed from 'users' to 'role'
+      name: "umut"
+
+    ceren:
+      password: "ybsceren"
+      role: "worker"  # Changed from 'users' to 'role'
+      name: "ceren"
+
+    cansu:
+      password: "ybscansu"
+      role: "worker"  # Changed from 'users' to 'role'
+      name: "cansu"
+
+    
