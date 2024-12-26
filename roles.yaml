@@ -6,5 +6,5 @@ roles:
       name: "Canan"
     mert:
       password: "0"
-      role: "user"  # Changed from 'users' to 'role'
+      role: "worker"  # Changed from 'users' to 'role'
       name: "mert"
