@@ -4,7 +4,7 @@ roles:
       password: "0"
       role: "admin"  # Changed from 'users' to 'role'
       name: "Canan"
-    Mert:
+    mert:
       password: "0"
       role: "user"  # Changed from 'users' to 'role'
-      name: "Mert"
+      name: "mert"
